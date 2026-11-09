@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}SmartIDS - Résultats d'Analyse{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <div>
+        <h2 style="font-size: 32px; font-family: 'Outfit', sans-serif;">Rapport d'Analyse Réseau</h2>
+        <p style="color: var(--color-text-muted); margin-top: 4px;">Fichier : <span style="color: var(--color-text); font-weight: 500;">{{ filename }}</span> | Mode : <span style="color: var(--neon-blue); font-weight: 600;">{{ "Multiclasse" if mode == "multiclass" else "Binaire" }}</span></p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        <a href="{{ url_for('download_report', history_id=history_id) }}" class="btn btn-primary">
+            <i class="fas fa-file-pdf"></i> Exporter en PDF
+        </a>
+        <a href="{{ url_for('upload') }}" class="btn btn-secondary">
+            <i class="fas fa-rotate-left"></i> Autre Analyse
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-row">
+    <!-- Threat Score Circular Progress & Overview Metrics -->
+    <div class="glass-card threat-score-panel" style="--threat-pct: {{ threat_percentage }}">
+        <h3 style="margin-bottom: 20px; font-size: 18px; color: var(--color-text-muted); font-weight: 500;">TAUX DE MENACE GLOBAL</h3>
+        <div class="radial-progress">
+            <div class="radial-progress-inner">
+                {{ "%.1f"|format(threat_percentage) }}%
+            </div>
+        </div>
+        
+        {% if threat_percentage > 10 %}
+            <span class="threat-status-badge danger"><i class="fas fa-triangle-exclamation"></i> Menace Détectée</span>
+        {% else %}
+            <span class="threat-status-badge safe"><i class="fas fa-shield-check"></i> Trafic Sûr</span>
+        {% endif %}
+        
+        <div style="margin-top: 24px; text-align: left; width: 100%; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 6px;">
+                <span style="color: var(--color-text-muted); font-size: 13px;">Lignes scannées :</span>
+                <span style="font-weight: 600; color: var(--color-text);">{{ total_connections }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 6px;">
+                <span style="color: var(--color-text-muted); font-size: 13px;">Flux normaux :</span>
+                <span style="font-weight: 600; color: var(--neon-green);">{{ normal_connections }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 6px;">
+                <span style="color: var(--color-text-muted); font-size: 13px;">Intrusions bloquées :</span>
+                <span style="font-weight: 600; color: var(--neon-red);">{{ attack_connections }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Visualization of Results -->
+    <div class="glass-card" style="padding: 24px; min-height: 320px; display: flex; flex-direction: column;">
+        <h3 style="font-size: 18px; margin-bottom: 20px; color: var(--color-text-muted); font-weight: 500;">REPRÉSENTATION GRAPHIQUE</h3>
+        <div style="flex-grow: 1; position: relative; height: 260px;">
+            <canvas id="resultsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Anomalies Table -->
+<div class="glass-card" style="padding: 28px;">
+    <h3 style="font-size: 20px; margin-bottom: 16px;"><i class="fas fa-list-check" style="color: var(--neon-blue); margin-right: 8px;"></i> Échantillon des Connexions Suspectes / Analysées</h3>
+    <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 20px;">Affichage des 10 premiers flux détectés comme critiques ou suspects pour investigation.</p>
+    
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th># Connection</th>
+                    <th>Protocol</th>
+                    <th>Service</th>
+                    <th>Flag</th>
+                    <th>Src Bytes</th>
+                    <th>Dst Bytes</th>
+                    <th>Classification</th>
+                    <th>Statut / Décision</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in sample_rows %}
+                <tr>
+                    <td>#{{ row.index }}</td>
+                    <td><code style="color: var(--neon-blue);">{{ row.protocol }}</code></td>
+                    <td>{{ row.service }}</td>
+                    <td>{{ row.flag }}</td>
+                    <td>{{ row.src_bytes }}</td>
+                    <td>{{ row.dst_bytes }}</td>
+                    <td>
+                        {% if row.prediction.lower() == 'normal' %}
+                            <span class="badge-threat normal">Normal</span>
+                        {% elif row.prediction.lower() == 'dos' %}
+                            <span class="badge-threat dos">DoS</span>
+                        {% elif row.prediction.lower() == 'probe' %}
+                            <span class="badge-threat probe">Probe</span>
+                        {% elif row.prediction.lower() == 'r2l' %}
+                            <span class="badge-threat r2l">R2L</span>
+                        {% elif row.prediction.lower() == 'u2r' %}
+                            <span class="badge-threat u2r">U2R</span>
+                        {% else %}
+                            <span class="badge-threat attack">Attaque</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.prediction.lower() == 'normal' %}
+                            <span style="color: var(--neon-green);"><i class="fas fa-circle-check"></i> Autorisé</span>
+                        {% else %}
+                            <span style="color: var(--neon-red); font-weight: 500;"><i class="fas fa-circle-xmark"></i> Bloqué (Alert)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: var(--color-text-muted); padding: 30px;">Aucune anomalie détectée dans ce rapport.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mode = "{{ mode }}";
+        const normal = {{ normal_connections }};
+        const attack = {{ attack_connections }};
+        
+        let multiData = null;
+        {% if mode == "multiclass" and class_counts %}
+            multiData = {
+                {% for label, count in class_counts.items() %}
+                    "{{ label }}": {{ count }},
+                {% endfor %}
+            };
+        {% endif %}
+        
+        renderResultsChart(normal, attack, multiData);
+    });
+</script>
+{% endblock %}

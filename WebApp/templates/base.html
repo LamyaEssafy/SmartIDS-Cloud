@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartIDS - Détection d'Intrusions{% endblock %}</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="navbar-brand">
+            <i class="fas fa-shield-halved"></i> SmartIDS
+        </a>
+        <ul class="navbar-menu">
+            <li>
+                <a href="{{ url_for('index') }}" class="navbar-link {% if request.path == '/' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('upload') }}" class="navbar-link {% if request.path == '/upload' %}active{% endif %}">
+                    <i class="fas fa-file-upload"></i> Analyser
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('predict_single') }}" class="navbar-link {% if request.path == '/predict_single' %}active{% endif %}">
+                    <i class="fas fa-keyboard"></i> Test Manuel
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('history') }}" class="navbar-link {% if request.path == '/history' %}active{% endif %}">
+                    <i class="fas fa-history"></i> Historique
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('about') }}" class="navbar-link {% if request.path == '/about' %}active{% endif %}">
+                    <i class="fas fa-info-circle"></i> À Propos
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages" style="margin-bottom: 24px;">
+                    {% for message in messages %}
+                        <div class="flash-message" style="background: rgba(255, 0, 85, 0.15); border: 1px solid var(--neon-red); color: #991b1b; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-circle-exclamation" style="color: var(--neon-red);"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 SmartIDS - Projet Intelligent de Détection des Intrusions Réseau. Développé selon la méthodologie CRISP-DM.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

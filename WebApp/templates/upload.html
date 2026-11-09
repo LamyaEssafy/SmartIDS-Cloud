@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}SmartIDS - Analyser un Fichier{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 800px; margin: 0 auto; padding: 40px;">
+    <h2 style="font-size: 28px; margin-bottom: 12px; font-family: 'Outfit', sans-serif; text-align: center;">
+        <i class="fas fa-magnifying-glass-chart" style="color: var(--neon-blue); margin-right: 10px;"></i> Lancer une Analyse Réseau
+    </h2>
+    <p style="color: var(--color-text-muted); text-align: center; margin-bottom: 40px; font-size: 15px; line-height: 1.6;">
+        Importez un fichier de connexions réseau (CSV ou TXT) respectant le format standard NSL-KDD (sans en-tête ou avec les 41 features réseau standard).
+    </p>
+
+    <form id="upload-form" action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+        
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <label class="mode-option active" id="mode-bin-label">
+                <input type="radio" name="mode" value="binary" checked class="mode-radio">
+                <span class="mode-indicator"></span>
+                <div class="mode-details">
+                    <h4>Mode Binaire</h4>
+                    <p>Détection globale (Normal vs Attaque)</p>
+                </div>
+            </label>
+            
+            <label class="mode-option" id="mode-multi-label">
+                <input type="radio" name="mode" value="multiclass" class="mode-radio">
+                <span class="mode-indicator"></span>
+                <div class="mode-details">
+                    <h4>Mode Multiclasse</h4>
+                    <p>Classification (DoS, Probe, R2L, U2R, Normal)</p>
+                </div>
+            </label>
+        </div>
+
+        <!-- Upload Drag & Drop Zone -->
+        <div class="upload-zone" id="upload-zone">
+            <i class="fas fa-cloud-arrow-up upload-icon"></i>
+            <h3 class="upload-text">Glissez-déposez votre fichier ici</h3>
+            <p class="upload-hint">Formats acceptés : .csv, .txt (Taille max: 10 Mo)</p>
+            <input type="file" name="file" id="file-input" accept=".csv,.txt" required>
+        </div>
+
+        <!-- Submit Button -->
+        <div style="text-align: center;">
+            <button type="submit" class="btn btn-primary" style="padding: 14px 40px; font-size: 16px;">
+                <i class="fas fa-shield-halved"></i> Démarrer l'Analyse
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

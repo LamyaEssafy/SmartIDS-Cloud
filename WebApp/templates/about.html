@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}SmartIDS - À Propos du Projet{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="margin-bottom: 40px; padding: 40px;">
+    <h2 style="font-size: 32px; margin-bottom: 16px; font-family: 'Outfit', sans-serif; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">À propos de SmartIDS</h2>
+    <p style="color: var(--color-text); font-size: 16px; line-height: 1.7; margin-bottom: 24px;">
+        Le projet <strong>SmartIDS</strong> est un Système Intelligent de Détection des Intrusions Réseau. à des algorithmes de <strong>Machine Learning</strong> pour analyser la sûreté du trafic réseau.
+    </p>
+    
+    <div style="border-left: 3px solid var(--neon-blue); padding-left: 20px; margin: 30px 0; font-style: italic; color: var(--color-text-muted);">
+        "L'utilisation d'algorithmes de ML permet d'extraire des comportements complexes dans les paquets réseau afin de détecter des anomalies qu'un système classique par signature ne verrait pas."
+    </div>
+</div>
+
+<div class="dashboard-row" style="grid-template-columns: 1fr 1fr;">
+   
+    <!-- NSL-KDD Section -->
+    <div class="glass-card" style="padding: 30px;">
+        <h3 style="font-size: 22px; margin-bottom: 16px; color: var(--neon-violet);"><i class="fas fa-database"></i> Dataset NSL-KDD</h3>
+        <p style="color: var(--color-text-muted); line-height: 1.6; font-size: 14px; margin-bottom: 16px;">
+            Le dataset NSL-KDD est un jeu de données de référence pour l'évaluation des systèmes de détection d'intrusions. Les connexions suspectes y sont classées en 4 grandes familles d'attaques :
+        </p>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--color-text-muted);">
+            <li><strong style="color: var(--neon-red);">DoS (Denial of Service) :</strong> Tentatives d'inondation de paquets (ex: Neptune, Smurf) visant à saturer les ressources du serveur.</li>
+            <li><strong style="color: var(--neon-blue);">Probe (Reconnaissance) :</strong> Scans de ports et d'adresses visant à cartographier le réseau (ex: Satan, Nmap).</li>
+            <li><strong style="color: var(--neon-yellow);">R2L (Remote to Local) :</strong> Tentatives d'accès non autorisé depuis l'extérieur vers une machine locale (ex: Guess_Passwd).</li>
+            <li><strong style="color: var(--neon-violet);">U2R (User to Root) :</strong> Escalades de privilèges non autorisées de simple utilisateur vers le super-utilisateur root (ex: Buffer_Overflow).</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

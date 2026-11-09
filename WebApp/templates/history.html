@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}SmartIDS - Historique d'Analyse{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <div>
+        <h2 style="font-size: 32px; font-family: 'Outfit', sans-serif;">Journal d'Analyse (Historique)</h2>
+        <p style="color: var(--color-text-muted); margin-top: 4px;">Historique complet des scans réseau effectués sur ce serveur.</p>
+    </div>
+    {% if history_entries %}
+    <form action="{{ url_for('clear_history') }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir vider tout l\'historique ? Cette action est irréversible.');">
+        <button type="submit" class="btn btn-secondary" style="border-color: rgba(255,0,85,0.3); color: var(--neon-red);">
+            <i class="fas fa-trash-can"></i> Vider l'Historique
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+<!-- History Table -->
+<div class="glass-card" style="padding: 28px;">
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Date d'Analyse</th>
+                    <th>Nom du Fichier</th>
+                    <th>Mode</th>
+                    <th>Lignes Scannées</th>
+                    <th>Attaques Détectées</th>
+                    <th>Taux de Menace</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in history_entries %}
+                <tr>
+                    <td><span style="color: var(--color-text-muted); font-size: 13px;">{{ entry.created_at }}</span></td>
+                    <td style="font-weight: 500; color: var(--color-text);">{{ entry.filename }}</td>
+                    <td>
+                        <span style="font-size: 12px; font-weight: 600; color: var(--neon-blue); text-transform: uppercase;">
+                            {{ "Multiclasse" if entry.mode == "multiclass" else "Binaire" }}
+                        </span>
+                    </td>
+                    <td>{{ entry.total_connections }}</td>
+                    <td style="color: {% if entry.attack_connections > 0 %}var(--neon-red){% else %}var(--neon-green){% endif %}; font-weight: 600;">
+                        {{ entry.attack_connections }}
+                    </td>
+                    <td style="font-weight: 600;">
+                        {% set rate = (entry.attack_connections / entry.total_connections * 100) if entry.total_connections > 0 else 0 %}
+                        <span style="color: {% if rate > 10 %}var(--neon-red){% else %}var(--neon-green){% endif %};">
+                            {{ "%.1f"|format(rate) }}%
+                        </span>
+                    </td>
+                    <td style="text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
+                        <a href="{{ url_for('result_details', history_id=entry.id) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; border-radius: 6px;">
+                            <i class="fas fa-chart-pie"></i> Visualiser
+                        </a>
+                        <a href="{{ url_for('download_report', history_id=entry.id) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; color: var(--neon-blue); border-color: var(--border-neon-blue);">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </a>
+                        <a href="{{ url_for('delete_entry', entry_id=entry.id) }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; border-radius: 6px; border-color: rgba(255,0,85,0.15);" onclick="return confirm('Supprimer ce rapport ?');">
+                            <i class="fas fa-trash" style="color: var(--neon-red);"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 40px;">
+                        <i class="fas fa-folder-open" style="font-size: 36px; margin-bottom: 12px; display: block; color: rgba(0,0,0,0.1);"></i>
+                        Aucune analyse enregistrée dans le journal.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
